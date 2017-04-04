@@ -1,0 +1,1 @@
+"On The Map" is an iOS application developed as part of the Udacity iOS Development Nanodegree program. It uses MapKit, networking, JSON Serialization and Reachability in order to display the locations of Udacity students currently studying around the globe.
