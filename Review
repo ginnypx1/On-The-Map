@@ -1,0 +1,131 @@
+On The Map
+
+Udacity Review 4/4/17
+
+Requires Changes - 1 specification Requires Changes
+
+"Very nice work. There's only one issue that I've identified. Keep it up!"
+
+Login View
+
+- The app has a login view that accepts email and password strings from users, with a “Login” button.
+    Good job! To go one step further and make your app stand out you could support Facebook Login. Most users today do not like remembering a lot of usernames and passwords and prefer something more convenient, one username and password for all the services!
+-The app uses an Alert View Controller to notify the user if the login connection fails. It differentiates between a failure to connect, and incorrect credentials (i.e., wrong email or password).
+    The app properly differentiates between a failure to connect, and incorrect credentials.
+
+Student Locations Tabbed View
+
+- The app downloads the 100 most recent locations posted by students.
+    The parameter limit is utilized.
+- The app contains a StudentInformation struct with appropriate properties for locations and links.
+- The struct has an init() method that accepts a dictionary as an argument.
+- The StudentInformation structs are stored as an array (or other suitable data structure) inside a separate model class.
+- The app displays an alert if the download fails.
+- The app displays downloaded data in a tabbed view with two tabs: a map and a table.
+- The map view has a pin for each student in the correct location.
+- Tapping the pins shows an annotation with the student's name and the link the student posted.
+- Tapping a student’s pin annotation opens the default device browser to the student's posted link.
+- The table view has a row for each downloaded record with the student’s name displayed.
+- The table is sorted in order of most recent to oldest update.
+    order = -updatedAt is used.
+- Tapping a row in the table opens the default device browser to the student's link.
+- The Student Locations Tabbed View has a pin button in the upper right corner of the navigation bar.
+- The button modally presents the Information Posting View so that users can post their own information to the server.
+- The Student Locations Tabbed View has a logout button in the upper left corner of the navigation bar.
+- REQUIRES CHANGES: The logout button causes the Student Locations Tabbed View to dismiss, and logs out of the current session.
+    The tabbed view is not dismissed but another instance of the login view is presented.
+
+Information Posting View
+
+- The Information Posting view prompts users to enter a string representing their location.
+- The text view or text field where the location string should be typed is clearly present.
+- The app allows users to add a URL to be included with their location.
+- The app provides a readily accessible "Submit" button that the user can tap to post the information to the server.
+- When a "Submit" button is pressed, the app forward geocodes the address string and stores the resulting latitude and longitude. Foward geocoding can be accomplished using CLGeocoder's geocodeAddressString() or MKLocalSearch's startWithCompletionHandler().
+    CLGeocoder's geocodeAddressString()is used.
+- An activity indicator is displayed during geocoding, and returns to normal state on completion.
+- SUGGESTION: The app displays an alert if the geocoding fails.
+    I suggest starting the geocoding and displaying the activity indicator view from the previous view (Add Pin View).
+- The app shows a placemark on a map via the geocoded response. The app zooms the map into an appropriate region.
+- The app successfully encodes the data in JSON and posts the search string and coordinates to the RESTful service.
+- The app provides a readily accessible button that the user can tap to cancel (dismiss) the Information Posting View.
+- The app displays an alert view if the post fails.
+
+Networking Architecture
+
+- The networking and JSON parsing code is located in a dedicated API client class (and not, for example, inside a view controller). The class uses closures for completion and error handling.
+- The networking code uses Swift's built-in NSURLSession library, not a third-party framework.
+    The built-in libraries are used.
+- The JSON parsing code uses Swift's built-in NSJSONSerialization library, not a third-party framework.
+
+LoginViewController.swift
+
+- Line 25: Awesome! Although not a requirement it's great that the app supports an activity indicator that animates while it authenticates. Such an addition leads to a far better user experience, plus it's a good practice.
+For the capstone project (You Decide!) this would be a requirement. As a rule, the user should always know about network activity.
+- Line 55 Awesome! Good to see that you're stopping the activity indicator in the main queue. It performs much better this way with no delays between executing the code and seeing the indicator stop.
+
+ListViewController.swift
+
+- Line 79: SUGGESTION: Deselect the selected row here so that it doesn't remain in the "Selected State" after returning to the app from the browser: tableView.deselectRowAtIndexPath(indexPath, animated: true)
+- Line 102: REQUIRED: The tabbed view should be dismised here. You're now presenting a new instance of the login view which is a memory leak. Theoretically, if the logout button is pressed enough times, the memory will fill up.
+    dismiss(animated: true, completion: nil)
+
+StudentLocationModel.swift
+
+- Line 15: Awesome! Great! The array of structs is stored separately from the controllers or the clients. SUGGESTION: Place it inside the StudentLocation struct.
+
+OnTheMapNavigationSegues.swift
+
+-- line 31: func transitionToWebsite
+    Awesome! Excellent! An alert is displayed if the URL is invalid.
+
+OnTheMapAlerts.swift
+
+-- line 16: displayAlert
+    SUGGESTION: Consider placing these methods in an extension of UIViewController or a helper class.
+
+MapViewController.swift
+
+-- line 207: func logOut
+    REQUIRED: The tabbed view should be dismissed here. You're now presenting a new instance of hte login view which is a memory leak. Theoretically, if the logout button is pressed enough times, the memory will fill up.
+        dismiss(animated: true, completion: nil)
+
+CHANGES IMPLEMENTED:
+
+REQUIRED:
+
+ListViewController.swift - line 102, required dismiss tabBarController has been fixed.
+
+MapViewController.swift - line 207, required dismiss tabBarController has been fixed.
+
+SUGGESTIONS:
+
+AddPinViewController.swift - I have taken the suggestion to start the geocoding and display the activity indicator view from this view instead of the FindLocationViewController.swift
+
+ListViewController.swift - line 79, I have taken the suggestion and the app now deselects the selected row inside of didSelectRowAtIndexPath.
+
+StudentLocationModel.swift - line 15, I have taken the suggestion and placed the array of all student locations inside the StudentLocation struct.
+
+OnTheMapAlerts.swift - I have taken the suggestion to put the alerts in their own helper class and implemented this throughout the app.
+
+REVIEW #2: 4/4/17
+
+MEETS SPECIFICATIONS:
+
+AddPinViewController.swift - 
+
+Line 58 - getLatitudeAndLongitudeFromMapString
+	Awesome! Great job following MVC guidance
+
+MapViewController.swift - 
+Line 210 - fund logOut
+	Awesome! Excellent job dismissing the current view
+
+StudentLocationModel.swift - 
+Line 17 - struct StudentLocation
+	Awesome! Great job! Global variables should be avoided
+
+OnTheMapAlerts.swift - 
+Line 15 - class OnTheMapAlerts
+	Awesome! Excellent! Now the repetition is avoided
+
