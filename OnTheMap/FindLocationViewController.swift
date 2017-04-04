@@ -25,8 +25,6 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
     
     var studentLocation: StudentLocation?
     
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
     var firstName: String = ""
     var lastName: String = ""
     
@@ -46,11 +44,11 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
         if studentLocation.objectId == "" {
             // make the call to udacity to get first name and last name
             getNewStudentInformation() { () -> Void in
-                self.getLatitudeAndLongitudeFromMapString(mapString: studentLocation.mapString)
+                self.loadMapOfLocation()
             }
         } else {
             // extract latitude and longitude from mapString and create a map
-            getLatitudeAndLongitudeFromMapString(mapString: studentLocation.mapString)
+            loadMapOfLocation()
         }
     }
     
@@ -73,45 +71,6 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
         self.tabBarController?.tabBar.isHidden = true
     }
     
-    // use the studentLocation.mapString to get a latitude and longitude
-    func getLatitudeAndLongitudeFromMapString(mapString: String)  {
-
-        self.activityIndicator.startAnimating()
-        
-        CLGeocoder().geocodeAddressString(mapString, completionHandler: { (placemarks, error) in
-            if error != nil {
-                print("There was an error decoding the mapString: \(String(describing: error))")
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
-                    } else {
-                        displayAlert(from: self, title: "Location Not Found", message: "Could Not Geocode the Provided Location.")
-                    }
-                }
-            } else {
-                guard let placemarks = placemarks else {
-                    print("There was no data recieved.")
-                    return
-                }
-                if placemarks.count > 0 {
-                    let placemark = placemarks[0]
-                    let location = placemark.location
-                    let coordinate = location?.coordinate
-                    let latitude = (coordinate?.latitude)!
-                    let longitude = (coordinate?.longitude)!
-                    
-                    self.latitude = latitude
-                    self.longitude = longitude
-                    
-                    DispatchQueue.main.async {
-                        self.loadMapOfLocation()
-                    }
-                }
-            }
-        })
-    }
-    
     // MARK: - Create Map
     
     func loadMapOfLocation() {
@@ -121,8 +80,8 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
             return
         }
         
-        let latitude = self.latitude
-        let longitude = self.longitude
+        let latitude = studentLocation.latitude
+        let longitude = studentLocation.longitude
         let latDelta: CLLocationDegrees = 0.02
         let lonDelta: CLLocationDegrees = 0.02
         let span: MKCoordinateSpan = MKCoordinateSpanMake(latDelta, lonDelta)
@@ -155,9 +114,9 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving the Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                     }
                 }
                 return
@@ -192,9 +151,9 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: "Request Failed", message: "There Was an Error Sending the Request for a New Location Pin.")                    }
+                        OnTheMapAlerts.displayAlert(from: self, title: "Request Failed", message: "There Was an Error Sending the Request for a New Location Pin.")                    }
                 }
             } else {
                 guard let response = response, (response[ParseRequest.ParseResponseKeys.creationDate]) != nil else {
@@ -223,15 +182,15 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                     }
                 }
             } else {
-                guard let response = response, (response[ParseRequest.ParseResponseKeys.creationDate]) != nil else {
+                guard let response = response, (response[ParseRequest.ParseResponseKeys.lastUpdated]) != nil else {
                     print("The pin was not updated.")
-                    displayAlert(from: self, title: "Request Failed", message: "There Was an Error Updating the Location Pin.")
+                    OnTheMapAlerts.displayAlert(from: self, title: "Request Failed", message: "There Was an Error Updating the Location Pin.")
                     return
                 }
 
@@ -256,18 +215,11 @@ class FindLocationViewController: UIViewController, MKMapViewDelegate {
         // check for newStudentLocation
         if studentLocation.objectId == "" {
 
-            studentLocation.latitude = self.latitude
-            studentLocation.longitude = self.longitude
             studentLocation.firstName = self.firstName
             studentLocation.lastName = self.lastName
-
             self.sendNewStudentLocation(studentLocation: studentLocation)
             
         } else {
-            // update existing pin
-            studentLocation.latitude = self.latitude
-            studentLocation.longitude = self.longitude
-
             self.sendUpdatedStudentLocation(studentLocation: studentLocation)
         }
     }

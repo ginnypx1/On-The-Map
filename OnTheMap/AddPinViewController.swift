@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import MapKit
+import SystemConfiguration
 
 class AddPinViewController: UIViewController {
     
@@ -19,6 +21,8 @@ class AddPinViewController: UIViewController {
     
     let onTheMapTextFieldDelegate = OnTheMapTextFieldDelegate()
     
+    var activityIndicator: UIActivityIndicatorView!
+    
     var studentLocation: StudentLocation?
     
     // MARK: - View
@@ -28,6 +32,8 @@ class AddPinViewController: UIViewController {
         // set text field delegate
         locationTextField.delegate = onTheMapTextFieldDelegate
         websiteTextField.delegate = onTheMapTextFieldDelegate
+        // add activity indicator
+        addActivityIndicator()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,6 +49,43 @@ class AddPinViewController: UIViewController {
         // unsubscribe to keyboard notifications
         unsubscribeToKeyboardNotifications()
     }
+    
+    // MARK: - Geocode the mapString
+    
+    // use the studentLocation.mapString to get a latitude and longitude
+    func getLatitudeAndLongitudeFromMapString(mapString: String, completionHandlerForCoordinates: @escaping (_ coordinate: (Double, Double)) -> Void)  {
+        
+        self.activityIndicator.startAnimating()
+        
+        CLGeocoder().geocodeAddressString(mapString, completionHandler: { (placemarks, error) in
+            if error != nil {
+                print("There was an error decoding the mapString: \(String(describing: error))")
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    if isInternetAvailable() == false {
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
+                    } else {
+                        OnTheMapAlerts.displayAlert(from: self, title: "Location Not Found", message: "Could Not Geocode the Provided Location.")
+                    }
+                }
+            } else {
+                guard let placemarks = placemarks else {
+                    print("There was no data recieved.")
+                    return
+                }
+                if placemarks.count > 0 {
+                    let placemark = placemarks[0]
+                    let location = placemark.location
+                    let coordinate = location?.coordinate
+                    let latitude = (coordinate?.latitude)!
+                    let longitude = (coordinate?.longitude)!
+                    
+                    completionHandlerForCoordinates((latitude, longitude))
+                }
+            }
+        })
+    }
+
     
     // MARK: - Cancel Add Pin
     
@@ -62,7 +105,7 @@ class AddPinViewController: UIViewController {
             // grab the text field values
             guard let locationText = self.locationTextField.text, let websiteText = self.websiteTextField.text else {
                 print("The text fields were empty.")
-                displayAlert(from: self, title: nil, message: "Please Provide a Location and a Valid URL.")
+                OnTheMapAlerts.displayAlert(from: self, title: nil, message: "Please Provide a Location and a Valid URL.")
                 return
             }
             
@@ -71,18 +114,26 @@ class AddPinViewController: UIViewController {
                 return
             }
             
-            // reset studentLocation values for mapString and mediaURL
-            studentLocation.mapString = locationText
-            studentLocation.mediaURL = websiteText
-            
-            // segue to LocationView
-            let findLocationView = self.storyboard?.instantiateViewController(withIdentifier: "FindLocationView") as! FindLocationViewController
-            findLocationView.studentLocation = studentLocation
-            self.navigationController?.pushViewController(findLocationView, animated: true)
-            
+            // extract the latitude and longitude from the provided location
+            self.getLatitudeAndLongitudeFromMapString(mapString: locationText) { (coordinate: (Double, Double)) -> Void in
+                
+                // reset studentLocation values for latitude, longitude, mapString and mediaURL
+                studentLocation.latitude = coordinate.0
+                studentLocation.longitude = coordinate.1
+                studentLocation.mapString = locationText
+                studentLocation.mediaURL = websiteText
+                
+                // segue to LocationView
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    let findLocationView = self.storyboard?.instantiateViewController(withIdentifier: "FindLocationView") as! FindLocationViewController
+                    findLocationView.studentLocation = studentLocation
+                    self.navigationController?.pushViewController(findLocationView, animated: true)
+                }
+            }
             
         } else {
-            displayAlert(from: self, title: nil, message: "Please Provide a Location and a Valid URL Including HTTP(S)://")
+            OnTheMapAlerts.displayAlert(from: self, title: nil, message: "Please Provide a Location and a Valid URL Including HTTP(S)://")
         }
     }
 }

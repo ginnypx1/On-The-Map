@@ -52,8 +52,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // retrieve studentLocation data and load into the mapView
     func loadMapData() {
-
+        
+        StudentLocation.allStudentLocations.removeAll()
         removeAllMapAnnotations()
+        
         self.activityIndicator.startAnimating()
         
         self.parseClient.loadStudentLocations() { (locations: [StudentLocation]?, error: NSError?) -> Void in
@@ -63,9 +65,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving the Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                     }
                 }
             } else {
@@ -134,14 +136,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if control == annotationView.rightCalloutAccessoryView {
             
             guard let mediaURLString = annotationView.annotation?.subtitle as? String else {
-                displayAlert(from: self, title: "Website Not Found", message: "The Link Provided By the Student Was Invalid.")
+                OnTheMapAlerts.displayAlert(from: self, title: "Website Not Found", message: "The Link Provided By the Student Was Invalid.")
                 return
             }
             
             if mediaURLString.hasPrefix("https://") || mediaURLString.hasPrefix("http://") {
                 transitionToWebsite(from: self, urlString: mediaURLString)
             } else {
-                displayAlert(from: self, title: "Invalid URL", message: "This Student Has Provided an Invalid Link.")
+                OnTheMapAlerts.displayAlert(from: self, title: "Invalid URL", message: "This Student Has Provided an Invalid Link.")
             }
         }
     }
@@ -168,9 +170,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving the Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                         
                     }
                 }
@@ -186,7 +188,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 // else alert that a pin already exists and give choice to overwrite
                 } else {
                     self.activityIndicator.stopAnimating()
-                    displayOverwriteAlert(from: self, studentLocation: studentLocation)
+                    OnTheMapAlerts.displayOverwriteAlert(from: self, studentLocation: studentLocation)
                 }
             }
         }
@@ -204,10 +206,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             if success {
                 DispatchQueue.main.sync {
                     self.activityIndicator.stopAnimating()
-                    transitionToLogIn(from: self)
+                    self.dismiss(animated:true,completion:nil)
                 }
             } else {
-                displayAlert(from: self, title: "Logout Unsuccessful", message: "Please try again.")
+                OnTheMapAlerts.displayAlert(from: self, title: "Logout Unsuccessful", message: "Please try again.")
             }
         }
     }

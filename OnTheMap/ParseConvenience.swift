@@ -27,10 +27,10 @@ extension ParseClient {
                 
                 for dictionary in locations {
                     let studentLocation = StudentLocation(from: dictionary)
-                    allStudentLocations.append(studentLocation)
+                    StudentLocation.allStudentLocations.append(studentLocation)
                 }
 
-                completionHandlerForAllStudentLocationData(allStudentLocations, nil)
+                completionHandlerForAllStudentLocationData(StudentLocation.allStudentLocations, nil)
             }
         }
     }

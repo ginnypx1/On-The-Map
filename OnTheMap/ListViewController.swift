@@ -52,7 +52,7 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // return number of StudentLocations in locations
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return allStudentLocations.count
+        return StudentLocation.allStudentLocations.count
     }
     
     // create a StudentLocationTableViewCell, populate it with locations
@@ -61,7 +61,7 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell") as! StudentLocationTableViewCell
         
         // populates the table row with studentLocation data
-        let studentLocation = allStudentLocations[(indexPath as NSIndexPath).row]
+        let studentLocation = StudentLocation.allStudentLocations[(indexPath as NSIndexPath).row]
         
         let first = studentLocation.firstName
         let last = studentLocation.lastName
@@ -77,13 +77,15 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // turn the studentLocation mediaURL into a URL
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let studentLocation = allStudentLocations[indexPath.row]
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        let studentLocation = StudentLocation.allStudentLocations[indexPath.row]
         let mediaURLString = studentLocation.mediaURL
         
         if mediaURLString.hasPrefix("https://") || mediaURLString.hasPrefix("http://") {
             transitionToWebsite(from: self, urlString: mediaURLString)
         } else {
-            displayAlert(from: self, title: "Invalid URL", message: "This Student Has Provided an Invalid Link.")
+            OnTheMapAlerts.displayAlert(from: self, title: "Invalid URL", message: "This Student Has Provided an Invalid Link.")
         }
     }
     
@@ -99,10 +101,10 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
             if success {
                 DispatchQueue.main.sync {
                     self.activityIndicator.stopAnimating()
-                    transitionToLogIn(from: self)
+                    self.dismiss(animated:true,completion:nil)
                 }
             } else {
-                displayAlert(from: self, title: "Logout Unsuccessful", message: "Please try again.")
+                OnTheMapAlerts.displayAlert(from: self, title: "Logout Unsuccessful", message: "Please try again.")
             }
         }
     }
@@ -112,7 +114,8 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // retrieves the studentLocation data from Parse and loads it into the tableView
     func loadTableData() {
 
-        allStudentLocations.removeAll()
+        StudentLocation.allStudentLocations.removeAll()
+        
         self.activityIndicator.startAnimating()
         
         self.parseClient.loadStudentLocations() { (locations: [StudentLocation]?, error: NSError?) -> Void in
@@ -122,15 +125,15 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving the Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                         
                     }
                 }
             } else {
                 if let locations = locations {
-                    allStudentLocations = locations
+                    StudentLocation.allStudentLocations = locations
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
                         self.tableView.reloadData()
@@ -159,9 +162,9 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if isInternetAvailable() == false {
-                        displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                        OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                     } else {
-                        displayAlert(from: self, title: nil, message: "There Was an Error Retrieving the Student Data.")
+                        OnTheMapAlerts.displayStandardAlert(from: self)
                     }
                 }
             } else {
@@ -176,7 +179,7 @@ class ListViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 //alert that a pin already exists and give choice to overwrite
                 } else {
                     self.activityIndicator.stopAnimating()
-                    displayOverwriteAlert(from: self, studentLocation: studentLocation)
+                    OnTheMapAlerts.displayOverwriteAlert(from: self, studentLocation: studentLocation)
                 }
             }
         }

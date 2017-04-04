@@ -60,7 +60,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 self.present(tabBarController, animated: true)
             } else {
                 // alert login failure
-                displayAlert(from: self, title: nil, message: "There Was an Error Logging In. Please Try Again.")
+                OnTheMapAlerts.displayAlert(from: self, title: nil, message: "There Was an Error Logging In. Please Try Again.")
             }
         }
     }
@@ -82,13 +82,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                             self.activityIndicator.stopAnimating()
                             if error?.code == 403 {
                                 // Alert invalid credentials
-                                displayAlert(from: self, title: nil, message: "The Username and Password Combination Provided Was Incorrect. Please Try Again.")
+                                OnTheMapAlerts.displayAlert(from: self, title: nil, message: "The Username and Password Combination Provided Was Incorrect. Please Try Again.")
                             } else if isInternetAvailable() == false {
                                 // Alert no internet
-                                displayAlert(from: self, title: "No Internet Connection", message: "Make Sure Your Device is Connected to the Internet.")
+                                OnTheMapAlerts.displayInternetConnectionAlert(from: self)
                             } else {
                                 // Alert login failure
-                                displayAlert(from: self, title: nil, message: "There Was an Error During the Login Process. Please Try Again.")
+                                OnTheMapAlerts.displayAlert(from: self, title: nil, message: "There Was an Error During the Login Process. Please Try Again.")
                             }
                         }
                     }
@@ -106,7 +106,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             }
         // there is no text in the username or password field
         } else {
-            displayAlert(from: self, title: nil, message: "Please Enter a Username and Password.")
+            OnTheMapAlerts.displayAlert(from: self, title: nil, message: "Please Enter a Username and Password.")
         }
     }
     

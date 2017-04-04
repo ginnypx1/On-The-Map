@@ -28,14 +28,7 @@ func transitionToWebsite(from viewController: UIViewController, urlString: Strin
     if let url = NSURL(string: urlString) {
         UIApplication.shared.open(url as URL, options: [:], completionHandler: nil)
     } else {
-        displayAlert(from: viewController, title: "Invalid URL", message: "This Student Has Provided an Invalid URL.")
+        OnTheMapAlerts.displayAlert(from: viewController, title: "Invalid URL", message: "This Student Has Provided an Invalid URL.")
     }
 }
 
-// MARK: - Complete logout/ Transition to LogIn
-
-func transitionToLogIn(from viewController: UIViewController) {
-
-    let loginView = viewController.storyboard?.instantiateViewController(withIdentifier: "LoginView") as! LoginViewController
-    viewController.present(loginView, animated: true, completion: nil)
-}

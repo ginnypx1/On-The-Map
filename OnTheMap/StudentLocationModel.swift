@@ -12,9 +12,9 @@ import UIKit
 
 // MARK: - StudentLocation
 
-var allStudentLocations: [StudentLocation] = []
-
 struct StudentLocation {
+    
+    static var allStudentLocations: [StudentLocation] = []
     
     var latitude: Double
     var longitude: Double
