@@ -1,6 +1,6 @@
 # On The Map
 
-"On The Map" is an iOS application developed as part of the Udacity iOS Development Nanodegree program. It uses MapKit, URLSession networking, JSON Serialization and Reachability in order to display the locations of Udacity students currently studying around the globe.
+"On The Map" :earth_americas: is an iOS application developed as part of the Udacity iOS Development Nanodegree program. It uses MapKit, URLSession networking, JSON Serialization and Reachability in order to display the locations of Udacity students currently studying around the globe.
 
 ## Install
 
@@ -23,7 +23,7 @@ Once a student is logged in, they will be shown a map of the world, with pins at
 
 The locations of current Udacity students can also be seen inside a table view, which displays each student's name and provided website in a list. When the user clicks on a table cell, the featured student's website will open in Safari.
 
-A user can add their own location to the map by hitting the **+** button in the top right hand corner of both the table and the map views. The user can provide their location in the form of "City, State" and an interesting website in the "https://" or "http://" format. Once the user has entered this information, they will be shown a map to confirm their location, and once confirmed, their pin can be added to the world map.
+A user can add their own location to the map :round_pushpin: by hitting the **+** button in the top right hand corner of both the table and the map views. The user can provide their location in the form of "City, State" and an interesting website in the "https://" or "http://" format. Once the user has entered this information, they will be shown a map to confirm their location, and once confirmed, their pin can be added to the world map.
 
 A user can then modify their pin information (location and website) at any time.
 
